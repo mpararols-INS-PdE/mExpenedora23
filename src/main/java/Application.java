@@ -1,40 +1,38 @@
-import daos.ProducteDAO;
-import daos.ProducteDAO_MySQL;
+import daos.Dao;
+import daos.ProducteDao_MySQL;
 import model.Producte;
+import utils.InputHelper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
+
 
 public class Application {
 
-    //Passar al DAO -->     //TODO: llegir les propietats de la BD d'un fitxer de configuració (Properties)
-    //En general -->        //TODO: Afegir un sistema de Logging per les classes.
+    //TODO: Afegir un sistema de Logging per les classes.
 
-    private static ProducteDAO producteDAO = new ProducteDAO_MySQL();            //TODO: passar a una classe DAOFactory
+    private static final Dao<Producte> producteDAO = new ProducteDao_MySQL();            //TODO: passar a una classe DAOFactory
+    private static final InputHelper in = InputHelper.getInstance();
 
     public static void main(String[] args) {
 
-        Scanner lector = new Scanner(System.in);            //TODO: passar Scanner a una classe InputHelper
-        int opcio = 0;
-
+        int opcio;
         do
         {
             mostrarMenu();
-            opcio = lector.nextInt();
+            opcio = in.nextInt();
 
-            switch (opcio)
-            {
-                case 1:     mostrarMaquina();       break;
-                case 2:     comprarProducte();      break;
+            switch (opcio) {
+                case 1 -> mostrarMaquina();
+                case 2 -> comprarProducte();
 
-                case 10:    mostrarInventari();     break;
-                case 11:    afegirProductes();      break;
-                case 12:    modificarMaquina();     break;
-                case 13:    mostrarBenefici();      break;
+                case 10 -> mostrarInventari();
+                case 11 -> afegirProductes();
+                case 12 -> modificarMaquina();
+                case 13 -> mostrarBenefici();
 
-                case -1:    System.out.println("Bye...");           break;
-                default:    System.out.println("Opció no vàlida");
+                case -1 -> System.out.println("Bye...");
+                default -> System.out.println("Opció no vàlida");
             }
 
         }while(opcio != -1);
@@ -66,22 +64,20 @@ public class Application {
          *     Podeu fer-ho amb llenguatge SQL o mirant si el producte existeix i després inserir o actualitzar
          */
 
-        //Exemple de insersió SENSE ENTRADA DE DADES NI COMPROVACIÓ REPETITS
-
-        Producte p = new Producte("pomaP", "Pink Lady", "Poma Pink Lady envasada",
-                0.2f, 1.0f);
+        //Demanem les dades del nou producte
+        Producte p = in.askProducte();
 
         try {
 
-            //Demanem de guardar el producte p a la BD
-            producteDAO.createProducte(p);
+            //Intentem guardar el producte p a la BD
+            producteDAO.save(p);
 
-            //Agafem tots els productes de la BD i els mostrem (per compvoar que s'ha afegit)
-            ArrayList<Producte> productes = producteDAO.readProductes();
-            for (Producte prod: productes)
-            {
-                System.out.println(prod);
-            }
+            //Agafem de nou tots els productes de la taula de productes de la BD
+            ArrayList<Producte> productes = (ArrayList<Producte>) producteDAO.getAll();
+
+            //Mostrem tots els productes obtinguts de la BD
+            productes.forEach(System.out::println);
+
 
         } catch (SQLException e) {          //TODO: tractar les excepcions
             e.printStackTrace();
@@ -94,7 +90,7 @@ public class Application {
 
         try {
             //Agafem tots els productes de la BD i els mostrem
-            ArrayList<Producte> productes = producteDAO.readProductes();
+            ArrayList<Producte> productes = (ArrayList<Producte>) producteDAO.getAll();
             for (Producte prod: productes)
             {
                 System.out.println(prod);
