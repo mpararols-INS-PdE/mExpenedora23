@@ -28,6 +28,11 @@ public class ProducteDao_MySQL implements Dao<Producte> {
         }
     }
 
+    public ProducteDao_MySQL(Connection conn)
+    {
+        this.conn = conn;
+    }
+
     @Override
     public Producte get(String primaryKey) {
         return null;
